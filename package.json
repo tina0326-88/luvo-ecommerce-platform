@@ -1,0 +1,37 @@
+{
+  "name": "luvo-ecommerce",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@heroicons/vue": "^2.2.0",
+    "@vueuse/core": "^14.0.0",
+    "axios": "^1.12.2",
+    "chartjs": "^0.3.24",
+    "dayjs": "^1.11.18",
+    "dompurify": "^3.3.1",
+    "pinia": "^3.0.3",
+    "vee-validate": "^4.15.1",
+    "vue": "^3.5.22",
+    "vue-router": "^4.6.3",
+    "yup": "^1.7.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.38.0",
+    "eslint-plugin-vue": "^10.5.1",
+    "postcss": "^8.5.6",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^3.4.18",
+    "vite": "npm:rolldown-vite@7.1.14"
+  },
+  "overrides": {
+    "vite": "npm:rolldown-vite@7.1.14"
+  }
+}

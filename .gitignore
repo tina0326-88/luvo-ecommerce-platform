@@ -1,0 +1,91 @@
+# Dependencies
+
+# npm packages
+node_modules/
+
+# Yarn
+.yarn/
+.yarn-cache/
+
+# pnpm
+.pnpm-store/
+
+# Build Output
+
+# Vite production build
+dist/
+
+# Temporary build files
+.cache/
+.temp/
+
+# Environment Variables
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Keep example config
+!.env.example
+
+# Logs
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+*.log
+
+# IDE / Editor
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Operating System
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# Vite / Vue
+
+# Vite cache
+.vite/
+
+# TypeScript cache (if added later)
+*.tsbuildinfo
+
+# Testing
+
+coverage/
+
+.nyc_output/
+
+# Local files
+
+# Local settings
+*.local
+
+# Backup files
+*.bak
+*.swp
+*.swo
+
+# Optional: Image / Upload Temp
+
+# Temporary uploads
+uploads/
+temp/
+tmp/
