@@ -16,7 +16,6 @@
         class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100"
       >
         <div class="flex gap-2">
-          <!-- 快速查看 -->
           <button
             @click.prevent="$emit('quick-view', product)"
             class="bg-white text-gray-800 px-4 py-2 rounded-full hover:bg-amber-800 hover:text-white transition-colors shadow-lg text-sm font-medium"
@@ -25,7 +24,6 @@
             快速查看
           </button>
 
-          <!-- 加入收藏：收藏狀態由父層透過 prop 傳入，跟收藏列表頁共用同一份資料來源 -->
           <button
             @click.prevent="$emit('toggle-favorite', product)"
             :class="[
@@ -41,7 +39,7 @@
         </div>
       </div>
 
-      <!-- 標籤 -->
+      <!-- 標籤：NEW / 折扣 / 防水 / HOT / 售完，依商品資料動態決定要顯示哪些 -->
       <div class="absolute top-2 left-2 flex flex-col gap-1">
         <span
           v-if="product.isNew"
@@ -54,6 +52,18 @@
           class="bg-yellow-500 text-white text-xs px-2 py-1 rounded"
         >
           -{{ product.discount }}%
+        </span>
+        <span
+          v-if="product.waterproof"
+          class="bg-blue-500 text-white text-xs px-2 py-1 rounded"
+        >
+          防水
+        </span>
+        <span
+          v-if="product.isHot"
+          class="bg-orange-500 text-white text-xs px-2 py-1 rounded"
+        >
+          HOT
         </span>
         <span
           v-if="product.stock === 0"
@@ -69,14 +79,12 @@
       :to="`/products/detail/${product.id}`"
       class="block p-4 hover:bg-gray-50 transition-colors"
     >
-      <!-- 商品名稱 -->
       <h3
         class="text-base font-medium text-gray-800 mb-2 line-clamp-2 group-hover:text-amber-800 transition-colors"
       >
         {{ product.name }}
       </h3>
 
-      <!-- 評分：欄位名稱對齊商品列表頁（rating / reviews） -->
       <div class="flex items-center gap-2 mb-2">
         <div class="flex items-center gap-1">
           <span class="text-sm font-medium text-gray-700">
@@ -89,7 +97,6 @@
         </span>
       </div>
 
-      <!-- 價格 -->
       <div class="flex items-center gap-2">
         <span class="text-2xl font-bold text-amber-800">
           NT$ {{ formatPrice(finalPrice) }}
@@ -102,13 +109,29 @@
         </span>
       </div>
 
-      <!-- 顏色：商品資料目前是單一字串（color），不是陣列，先以文字呈現 -->
+      <p v-if="product.material" class="text-sm text-gray-600 mt-2">
+        {{ product.material }}
+      </p>
+
+      <!-- 特色標籤：彈性側邊、防滑鞋底這類商品規格重點 -->
+      <div
+        v-if="product.features && product.features.length"
+        class="flex flex-wrap gap-2 mt-2"
+      >
+        <span
+          v-for="feature in product.features"
+          :key="feature"
+          class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full"
+        >
+          {{ feature }}
+        </span>
+      </div>
+
       <div v-if="product.color" class="mt-3">
         <span class="text-xs text-gray-500">顏色：{{ product.color }}</span>
       </div>
     </router-link>
 
-    <!-- 加入購物車按鈕：loading 狀態由父層透過 adding prop 控制，避免連點造成重複請求 -->
     <div class="px-4 pb-4">
       <BaseButton
         @click="$emit('add-to-cart', product)"
@@ -132,23 +155,18 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  // 是否已收藏，由父層維護（跟 Boots/CasualShoes/LeatherShoes 的收藏邏輯共用同一份資料）
   isFavorited: {
     type: Boolean,
     default: false,
   },
-  // 是否正在加入購物車中，由父層控制
   adding: {
     type: Boolean,
     default: false,
   },
 });
 
-// 元件保持「笨」：只負責顯示與發出使用者意圖，不直接呼叫 Pinia store，
-// 實際加入購物車 / 收藏的邏輯統一由父層處理，跟 CartItem、OrderItem 架構一致
 defineEmits(["quick-view", "add-to-cart", "toggle-favorite"]);
 
-// 圖片載入失敗後的實際位址（取代原本打不到的 v-else 死程式碼）
 const imageFailed = ref(false);
 
 const imageSrc = computed(() => {
@@ -164,7 +182,6 @@ const handleImageError = () => {
   }
 };
 
-// 計算最終價格，四捨五入避免出現角、分
 const finalPrice = computed(() => {
   if (props.product.discount) {
     return Math.round(props.product.price * (1 - props.product.discount / 100));
@@ -172,7 +189,6 @@ const finalPrice = computed(() => {
   return props.product.price;
 });
 
-// 跟商品列表頁、CartItem、OrderItem 統一的格式化方式
 const formatPrice = (price) => {
   return (price ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };

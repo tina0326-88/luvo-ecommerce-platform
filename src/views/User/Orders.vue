@@ -1,235 +1,55 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- 麵包屑導航 -->
-    <div class="bg-white border-b">
-      <div class="container mx-auto px-4 py-4">
-        <nav class="flex text-sm text-gray-600">
-          <router-link to="/" class="hover:text-amber-800">首頁</router-link>
-          <span class="mx-2">/</span>
-          <span class="text-gray-900">我的訂單</span>
-        </nav>
-      </div>
-    </div>
+    <div class="container mx-auto px-4 py-12">
+      <h1 class="text-3xl font-bold text-gray-800 mb-8">訂單查詢</h1>
 
-    <div class="container mx-auto px-4 py-8">
-      <!-- 頁面標題 -->
-      <h1 class="text-3xl font-bold text-gray-900 mb-8">我的訂單</h1>
-
-      <!-- 篩選標籤 -->
-      <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <div class="flex flex-wrap gap-3">
+      <!-- 狀態篩選 + 搜尋 -->
+      <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+        <div class="flex flex-wrap gap-2 mb-4">
           <button
-            v-for="status in orderStatuses"
-            :key="status.value"
-            @click="currentStatus = status.value"
+            v-for="tab in statusTabs"
+            :key="tab.value"
+            @click="statusFilter = tab.value"
             :class="[
-              'px-4 py-2 rounded-lg font-medium transition-colors',
-              currentStatus === status.value
+              'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+              statusFilter === tab.value
                 ? 'bg-amber-800 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
             ]"
           >
-            {{ status.label }}
-            <span
-              v-if="getOrderCount(status.value) > 0"
-              class="ml-2 px-2 py-0.5 text-xs rounded-full"
-              :class="
-                currentStatus === status.value
-                  ? 'bg-white text-amber-800'
-                  : 'bg-gray-300 text-gray-700'
-              "
-            >
-              {{ getOrderCount(status.value) }}
-            </span>
+            {{ tab.label }}
           </button>
         </div>
+
+        <input
+          v-model="searchKeyword"
+          type="text"
+          placeholder="搜尋訂單編號"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
+        />
       </div>
 
       <!-- 訂單列表 -->
-      <div v-if="filteredOrders.length > 0" class="space-y-4">
-        <div
-          v-for="order in filteredOrders"
+      <div v-if="pagedOrders.length > 0" class="space-y-6">
+        <OrderItem
+          v-for="order in pagedOrders"
           :key="order.id"
-          class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
-        >
-          <!-- 訂單標題 -->
-          <div
-            class="bg-gray-50 px-6 py-4 border-b flex flex-wrap items-center justify-between gap-4"
-          >
-            <div class="flex items-center gap-4 flex-wrap">
-              <span class="text-sm text-gray-600">
-                訂單編號：<span class="font-medium text-gray-900">{{
-                  order.orderNumber
-                }}</span>
-              </span>
-              <span class="text-sm text-gray-600">
-                下單時間：{{ order.createdAt }}
-              </span>
-            </div>
-            <span :class="getStatusClass(order.status)">
-              {{ getStatusText(order.status) }}
-            </span>
-          </div>
-
-          <!-- 訂單商品 -->
-          <div class="p-6">
-            <div class="space-y-4">
-              <div
-                v-for="item in order.items"
-                :key="item.id"
-                class="flex gap-4"
-              >
-                <!-- 商品圖片 -->
-                <router-link :to="`/products/${item.productId}`">
-                  <img
-                    :src="item.image"
-                    :alt="item.name"
-                    class="w-20 h-20 object-cover rounded-lg hover:opacity-80 transition-opacity"
-                  />
-                </router-link>
-
-                <!-- 商品資訊 -->
-                <div class="flex-1">
-                  <router-link
-                    :to="`/products/${item.productId}`"
-                    class="font-medium text-gray-900 hover:text-amber-800 transition-colors"
-                  >
-                    {{ item.name }}
-                  </router-link>
-                  <div class="mt-1 text-sm text-gray-600">
-                    <span v-if="item.size">尺寸：{{ item.size }}</span>
-                    <span v-if="item.color" class="ml-3"
-                      >顏色：{{ item.color }}</span
-                    >
-                  </div>
-                  <div class="mt-1 text-sm text-gray-600">
-                    數量：{{ item.quantity }}
-                  </div>
-                </div>
-
-                <!-- 價格 -->
-                <div class="text-right">
-                  <div class="font-bold text-gray-900">
-                    ${{ (item.price * item.quantity).toLocaleString() }}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 訂單金額 -->
-            <div class="mt-4 pt-4 border-t">
-              <div class="flex justify-end">
-                <div class="space-y-1 text-right">
-                  <div class="text-sm text-gray-600">
-                    商品小計：${{ order.subtotal.toLocaleString() }}
-                  </div>
-                  <div class="text-sm text-gray-600">
-                    運費：${{ order.shippingFee.toLocaleString() }}
-                  </div>
-                  <div v-if="order.discount > 0" class="text-sm text-green-600">
-                    折扣：-${{ order.discount.toLocaleString() }}
-                  </div>
-                  <div class="text-xl font-bold text-amber-800">
-                    訂單總計：${{ order.total.toLocaleString() }}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 操作按鈕 -->
-            <div class="mt-4 pt-4 border-t flex flex-wrap gap-3 justify-end">
-              <!-- 查看詳情 -->
-              <router-link
-                :to="`/user/orders/${order.id}`"
-                class="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                查看詳情
-              </router-link>
-
-              <!-- 待付款 - 前往付款 -->
-              <button
-                v-if="order.status === 'pending'"
-                @click="handlePayment(order)"
-                class="px-4 py-2 bg-amber-800 text-white font-medium rounded-lg hover:bg-amber-900 transition-colors"
-              >
-                前往付款
-              </button>
-
-              <!-- 待收貨 - 確認收貨 -->
-              <button
-                v-if="order.status === 'shipped'"
-                @click="confirmReceipt(order.id)"
-                class="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
-              >
-                確認收貨
-              </button>
-
-              <!-- 已完成 - 再次購買 -->
-              <button
-                v-if="order.status === 'completed'"
-                @click="reorder(order)"
-                class="px-4 py-2 bg-amber-800 text-white font-medium rounded-lg hover:bg-amber-900 transition-colors"
-              >
-                再次購買
-              </button>
-
-              <!-- 已完成 - 評價商品 -->
-              <button
-                v-if="order.status === 'completed' && !order.reviewed"
-                @click="reviewOrder(order.id)"
-                class="px-4 py-2 border border-amber-800 text-amber-800 font-medium rounded-lg hover:bg-amber-50 transition-colors"
-              >
-                評價商品
-              </button>
-
-              <!-- 已取消/退款 - 刪除訂單 -->
-              <button
-                v-if="
-                  order.status === 'cancelled' || order.status === 'refunded'
-                "
-                @click="deleteOrder(order.id)"
-                class="px-4 py-2 border border-red-600 text-red-600 font-medium rounded-lg hover:bg-red-50 transition-colors"
-              >
-                刪除訂單
-              </button>
-
-              <!-- 申請退款 -->
-              <button
-                v-if="order.status === 'completed' && canRefund(order)"
-                @click="requestRefund(order.id)"
-                class="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                申請退款
-              </button>
-
-              <!-- 取消訂單 -->
-              <button
-                v-if="
-                  order.status === 'pending' || order.status === 'processing'
-                "
-                @click="cancelOrder(order.id)"
-                class="px-4 py-2 border border-red-600 text-red-600 font-medium rounded-lg hover:bg-red-50 transition-colors"
-              >
-                取消訂單
-              </button>
-
-              <!-- 查詢物流 -->
-              <button
-                v-if="order.status === 'shipped' && order.trackingNumber"
-                @click="trackOrder(order)"
-                class="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                 查詢物流
-              </button>
-            </div>
-          </div>
-        </div>
+          :order="order"
+          :loading-action="loadingOrderId === order.id ? loadingAction : ''"
+          @cancel-request="openCancelModal"
+          @confirm-receipt-request="openConfirmReceiptModal"
+          @pay="handlePay"
+          @review="handleReview"
+          @buy-again="handleBuyAgain"
+          @view-tracking="openTrackingModal"
+          @view-detail="goToDetail"
+        />
       </div>
 
-      <!-- 無訂單提示 -->
-      <div v-else class="bg-white rounded-lg shadow-sm p-12 text-center">
+      <!-- 空狀態 -->
+      <div v-else class="text-center py-24">
         <svg
-          class="w-24 h-24 text-gray-400 mx-auto mb-4"
+          class="w-24 h-24 mx-auto text-gray-300 mb-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -241,243 +61,205 @@
             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
           />
         </svg>
-        <h3 class="text-xl font-medium text-gray-900 mb-2">
-          {{
-            currentStatus === "all" ? "尚無訂單記錄" : "目前沒有符合條件的訂單"
-          }}
-        </h3>
-        <p class="text-gray-600 mb-6">
-          {{
-            currentStatus === "all"
-              ? "快去挑選喜歡的商品吧！"
-              : "試試其他篩選條件"
-          }}
-        </p>
-        <router-link
-          v-if="currentStatus === 'all'"
-          to="/products"
-          class="inline-block px-6 py-3 bg-amber-800 text-white font-bold rounded-lg hover:bg-amber-900 transition-colors"
-        >
-          開始購物
-        </router-link>
-        <button
-          v-else
-          @click="currentStatus = 'all'"
-          class="inline-block px-6 py-3 bg-amber-800 text-white font-bold rounded-lg hover:bg-amber-900 transition-colors"
-        >
-          查看所有訂單
-        </button>
+        <p class="text-gray-500 text-lg">沒有符合條件的訂單</p>
+      </div>
+
+      <!-- 分頁 -->
+      <div v-if="filteredOrders.length > pageSize" class="mt-8">
+        <BasePagination
+          v-model:current-page="currentPage"
+          :total="filteredOrders.length"
+          :page-size="pageSize"
+        />
       </div>
     </div>
+
+    <!-- 取消訂單確認 Modal -->
+    <BaseModal
+      v-model="showCancelModal"
+      title="取消訂單"
+      size="sm"
+      @confirm="confirmCancel"
+    >
+      <p class="text-gray-600">
+        確定要取消訂單「{{ pendingOrder?.orderNumber }}」嗎？取消後無法復原。
+      </p>
+    </BaseModal>
+
+    <!-- 確認收貨 Modal -->
+    <BaseModal
+      v-model="showConfirmReceiptModal"
+      title="確認收貨"
+      size="sm"
+      @confirm="confirmReceipt"
+    >
+      <p class="text-gray-600">
+        確認已收到訂單「{{ pendingOrder?.orderNumber }}」的商品嗎？
+      </p>
+    </BaseModal>
+
+    <!-- Toast -->
+    <transition name="fade">
+      <div
+        v-if="toastMessage"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg z-50"
+      >
+        {{ toastMessage }}
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import OrderItem from "@/components/business/OrderItem.vue";
+import BaseModal from "@/components/base/BaseModal.vue";
+import BasePagination from "@/components/base/BasePagination.vue";
+import { useOrderStore } from "@/stores/useOrderStore";
 
+const orderStore = useOrderStore();
+const orders = computed(() => orderStore.orders);
 const router = useRouter();
 
-// 當前篩選狀態
-const currentStatus = ref("all");
-
-// 訂單狀態選項
-const orderStatuses = ref([
-  { value: "all", label: "全部訂單" },
+const statusTabs = [
+  { value: "", label: "全部" },
   { value: "pending", label: "待付款" },
   { value: "processing", label: "處理中" },
-  { value: "shipped", label: "待收貨" },
+  { value: "shipped", label: "已出貨" },
   { value: "completed", label: "已完成" },
   { value: "cancelled", label: "已取消" },
-]);
+];
 
-// 訂單資料（模擬）
-const orders = ref([
-  {
-    id: 1,
-    orderNumber: "ORD20240103001",
-    status: "completed",
-    createdAt: "2024-01-03 14:30",
-    items: [
-      {
-        id: 1,
-        productId: 1,
-        name: "【Luvo】紳士格調經典牛津皮鞋",
-        image: "/images/product-1.jpg",
-        price: 6980,
-        quantity: 1,
-        size: "42",
-        color: "黑色",
-      },
-    ],
-    subtotal: 6980,
-    shippingFee: 0,
-    discount: 0,
-    total: 6980,
-    trackingNumber: null,
-    reviewed: false,
-  },
-  {
-    id: 2,
-    orderNumber: "ORD20231230002",
-    status: "shipped",
-    createdAt: "2023-12-30 10:15",
-    items: [
-      {
-        id: 2,
-        productId: 2,
-        name: "【Luvo】摩登時尚簡約牛津皮鞋",
-        image: "/images/product-2.jpg",
-        price: 4980,
-        quantity: 2,
-        size: "41",
-        color: "咖啡色",
-      },
-    ],
-    subtotal: 9960,
-    shippingFee: 100,
-    discount: 100,
-    total: 9960,
-    trackingNumber: "1234567890",
-    reviewed: false,
-  },
-  {
-    id: 3,
-    orderNumber: "ORD20231225003",
-    status: "pending",
-    createdAt: "2023-12-25 16:45",
-    items: [
-      {
-        id: 3,
-        productId: 3,
-        name: "【Luvo】復古風範雕花牛津皮鞋",
-        image: "/images/product-3.jpg",
-        price: 7980,
-        quantity: 1,
-        size: "43",
-        color: "棕色",
-      },
-    ],
-    subtotal: 7980,
-    shippingFee: 100,
-    discount: 0,
-    total: 8080,
-    trackingNumber: null,
-    reviewed: false,
-  },
-]);
+const statusFilter = ref("");
+const searchKeyword = ref("");
+const currentPage = ref(1);
+const pageSize = 5;
 
-// 篩選後的訂單
 const filteredOrders = computed(() => {
-  if (currentStatus.value === "all") {
-    return orders.value;
+  let result = orders.value;
+
+  if (statusFilter.value) {
+    result = result.filter((order) => order.status === statusFilter.value);
   }
-  return orders.value.filter((order) => order.status === currentStatus.value);
+
+  if (searchKeyword.value.trim()) {
+    const keyword = searchKeyword.value.trim().toLowerCase();
+    result = result.filter((order) =>
+      order.orderNumber.toLowerCase().includes(keyword)
+    );
+  }
+
+  return [...result].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
 });
 
-// 取得訂單數量
-const getOrderCount = (status) => {
-  if (status === "all") {
-    return orders.value.length;
-  }
-  return orders.value.filter((order) => order.status === status).length;
+const pagedOrders = computed(() => {
+  const start = (currentPage.value - 1) * pageSize;
+  return filteredOrders.value.slice(start, start + pageSize);
+});
+
+// 操作中的訂單與 loading 狀態，交給 OrderItem 顯示對應按鈕的 loading
+const loadingOrderId = ref(null);
+const loadingAction = ref("");
+
+const toastMessage = ref("");
+let toastTimer = null;
+const showToast = (message) => {
+  toastMessage.value = message;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toastMessage.value = "";
+  }, 2000);
 };
 
-// 取得狀態文字
-const getStatusText = (status) => {
-  const statusMap = {
-    pending: "待付款",
-    processing: "處理中",
-    shipped: "待收貨",
-    completed: "已完成",
-    cancelled: "已取消",
-    refunded: "已退款",
-  };
-  return statusMap[status] || status;
+// 取消訂單：先 emit 出來的只是意圖，這裡用 Modal 二次確認後才真的執行
+const showCancelModal = ref(false);
+const pendingOrder = ref(null);
+
+const openCancelModal = (order) => {
+  pendingOrder.value = order;
+  showCancelModal.value = true;
 };
 
-// 取得狀態樣式
-const getStatusClass = (status) => {
-  const baseClass = "px-3 py-1 text-sm font-medium rounded-full";
-  const statusClasses = {
-    pending: "bg-yellow-100 text-yellow-800",
-    processing: "bg-blue-100 text-blue-800",
-    shipped: "bg-purple-100 text-purple-800",
-    completed: "bg-green-100 text-green-800",
-    cancelled: "bg-gray-100 text-gray-800",
-    refunded: "bg-red-100 text-red-800",
-  };
-  return `${baseClass} ${statusClasses[status] || ""}`;
-};
+// confirmCancel() 裡原本直接改 order.status = "cancelled"，改成呼叫 store：
+const confirmCancel = async () => {
+  if (!pendingOrder.value) return;
+  const order = pendingOrder.value;
 
-// 判斷是否可退款（例如：完成後 7 天內）
-const canRefund = (order) => {
-  // 簡化邏輯，實際應該檢查訂單完成日期
-  return true;
-};
+  loadingOrderId.value = order.id;
+  loadingAction.value = "cancel";
+  showCancelModal.value = false;
 
-// 前往付款
-const handlePayment = (order) => {
-  router.push(`/checkout?orderId=${order.id}`);
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  orderStore.cancelOrder(order.id);
+  showToast(`訂單「${order.orderNumber}」已取消`);
+
+  loadingOrderId.value = null;
+  loadingAction.value = "";
+  pendingOrder.value = null;
 };
 
 // 確認收貨
-const confirmReceipt = (orderId) => {
-  if (confirm("確認已收到商品？")) {
-    const order = orders.value.find((o) => o.id === orderId);
-    if (order) {
-      order.status = "completed";
-      alert("✓ 已確認收貨");
-    }
-  }
+const showConfirmReceiptModal = ref(false);
+
+const openConfirmReceiptModal = (order) => {
+  pendingOrder.value = order;
+  showConfirmReceiptModal.value = true;
 };
 
-// 再次購買
-const reorder = (order) => {
-  alert("將商品加入購物車...");
-  // TODO: 將訂單商品加入購物車
-  router.push("/cart");
+// confirmReceipt() 同樣改成呼叫 store：
+const confirmReceipt = async () => {
+  if (!pendingOrder.value) return;
+  const order = pendingOrder.value;
+
+  loadingOrderId.value = order.id;
+  loadingAction.value = "confirm";
+  showConfirmReceiptModal.value = false;
+
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  orderStore.confirmReceipt(order.id);
+  showToast(`已確認收到訂單「${order.orderNumber}」`);
+
+  loadingOrderId.value = null;
+  loadingAction.value = "";
+  pendingOrder.value = null;
 };
 
-// 評價商品
-const reviewOrder = (orderId) => {
-  router.push(`/user/orders/${orderId}/review`);
+const handlePay = (order) => {
+  router.push(`/checkout?orderId=${order.id}`);
 };
 
-// 刪除訂單
-const deleteOrder = (orderId) => {
-  if (confirm("確定要刪除此訂單嗎？")) {
-    const index = orders.value.findIndex((o) => o.id === orderId);
-    if (index > -1) {
-      orders.value.splice(index, 1);
-      alert("✓ 訂單已刪除");
-    }
-  }
+const handleReview = (order) => {
+  // TODO: 開啟評價 Modal，待評價系統元件完成後補上
+  console.log("review order", order.orderNumber);
 };
 
-// 申請退款
-const requestRefund = (orderId) => {
-  router.push(`/user/orders/${orderId}/refund`);
+const handleBuyAgain = (order) => {
+  // TODO: 待 cartStore 補上「依訂單品項批次加入購物車」的方法後串接
+  console.log("buy again", order.orderNumber);
 };
 
-// 取消訂單
-const cancelOrder = (orderId) => {
-  if (confirm("確定要取消此訂單嗎？")) {
-    const order = orders.value.find((o) => o.id === orderId);
-    if (order) {
-      order.status = "cancelled";
-      alert("✓ 訂單已取消");
-    }
-  }
+const openTrackingModal = (order) => {
+  // TODO: 物流追蹤目前為模擬資料，之後可用 Modal 顯示物流狀態時間軸
+  console.log("view tracking", order.trackingNumber);
 };
 
-// 查詢物流
-const trackOrder = (order) => {
-  alert(`物流追蹤號：${order.trackingNumber}\n\n正在跳轉至物流查詢頁面...`);
-  // TODO: 開啟物流追蹤頁面
+const goToDetail = (order) => {
+  router.push(`/user/orders/${order.id}`);
 };
 </script>
 
 <style scoped>
-/* 自訂樣式 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>

@@ -1,37 +1,52 @@
 <template>
-  <footer class="bg-[#512830] py-8 mt-12">
-    <div class="container mx-auto px-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-white">
-        <!-- 聯絡資訊 -->
-        <div class="text-left">
-          <p class="leading-relaxed">
-            地址：台北市大安區忠孝東路四段 123 號 10 樓<br />
-            電話：(02) 1234-5678<br />
-            Email：support@luvo.com
+  <footer class="bg-gray-900 text-gray-300 mt-16">
+    <div class="container mx-auto px-4 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <h3 class="text-white text-lg font-bold mb-4">LUVO 履藝皮鞋</h3>
+          <p class="text-sm leading-relaxed">
+            以創新的設計理念重新定義皮鞋工藝，
+            讓每雙鞋都陪伴人們邁出自信的每一步。
           </p>
         </div>
 
-        <!-- 營業時間 -->
-        <div class="text-left md:text-right">
-          <p class="leading-relaxed">
-            營業時間（實體店）：<br />
-            週一至週五：10:00 - 20:00<br />
-            週六、週日：11:00 - 18:00
+        <div>
+          <h4 class="text-white font-medium mb-4">商品分類</h4>
+          <ul class="space-y-2 text-sm">
+            <li><router-link to="/products/leather-shoes" class="hover:text-white transition-colors">皮鞋系列</router-link></li>
+            <li><router-link to="/products/boots" class="hover:text-white transition-colors">靴子系列</router-link></li>
+            <li><router-link to="/products/casual-shoes" class="hover:text-white transition-colors">休閒鞋系列</router-link></li>
+            <li><router-link to="/accessories/bags" class="hover:text-white transition-colors">包款系列</router-link></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-white font-medium mb-4">會員服務</h4>
+          <ul class="space-y-2 text-sm">
+            <li><router-link to="/user/orders" class="hover:text-white transition-colors">訂單查詢</router-link></li>
+            <li><router-link to="/user/favorites" class="hover:text-white transition-colors">收藏清單</router-link></li>
+            <li><router-link to="/stores" class="hover:text-white transition-colors">門市查詢</router-link></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-white font-medium mb-4">關於本專案</h4>
+          <p class="text-sm leading-relaxed">
+            本網站為前端作品展示專案，未串接真實後端與金流，
+            商品與訂單資料僅供功能展示使用。
           </p>
         </div>
       </div>
 
-      <!-- 版權聲明 -->
-      <div class="text-center pt-6 mt-6 border-t border-white/20">
-        <p class="text-white text-sm">
-          &copy; 2025 Luvo. All rights reserved. This page is a practice
-          project.
-        </p>
+      <div class="border-t border-gray-800 mt-8 pt-6 text-center text-xs text-gray-500">
+        © {{ currentYear }} Luvo Ecommerce. 本專案僅供個人學習與作品紀錄使用。
       </div>
     </div>
   </footer>
 </template>
 
 <script setup>
-// 頁尾組件
+import { computed } from "vue";
+
+const currentYear = computed(() => new Date().getFullYear());
 </script>

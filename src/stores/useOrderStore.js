@@ -1,453 +1,162 @@
-// stores/useOrderStore.js
+import { ref, computed } from "vue";
 import { defineStore } from "pinia";
+import { loadFromStorage, saveToStorage, generateOrderNumber } from "@/utils/helpers";
 
-export const useOrderStore = defineStore("order", {
-  state: () => ({
-    // 訂單列表
-    orders: [],
+const ORDERS_STORAGE_KEY = "luvo-orders";
 
-    // 當前訂單
-    currentOrder: null,
-
-    // Loading 狀態
-    loading: false,
-
-    // 錯誤訊息
-    error: null,
-
-    // 訂單統計
-    statistics: {
-      total: 0,
-      pending: 0,
-      processing: 0,
-      shipped: 0,
-      completed: 0,
-      cancelled: 0,
-      refunded: 0,
-    },
-
-    // 結帳資料
-    checkout: {
-      items: [],
-      shippingAddress: null,
-      billingAddress: null,
-      paymentMethod: null,
-      shippingMethod: null,
-      coupon: null,
-      note: "",
-    },
-  }),
-
-  getters: {
-    // 取得所有訂單
-    allOrders: (state) => state.orders,
-
-    // 依狀態篩選訂單
-    ordersByStatus: (state) => (status) => {
-      if (status === "all") return state.orders;
-      return state.orders.filter((order) => order.status === status);
-    },
-
-    // 待付款訂單
-    pendingOrders: (state) => {
-      return state.orders.filter((order) => order.status === "pending");
-    },
-
-    // 處理中訂單
-    processingOrders: (state) => {
-      return state.orders.filter((order) => order.status === "processing");
-    },
-
-    // 待收貨訂單
-    shippedOrders: (state) => {
-      return state.orders.filter((order) => order.status === "shipped");
-    },
-
-    // 已完成訂單
-    completedOrders: (state) => {
-      return state.orders.filter((order) => order.status === "completed");
-    },
-
-    // 取得訂單總額
-    totalAmount: (state) => {
-      return state.orders.reduce((sum, order) => sum + order.total, 0);
-    },
-
-    // 結帳商品數量
-    checkoutItemCount: (state) => {
-      return state.checkout.items.reduce((sum, item) => sum + item.quantity, 0);
-    },
-
-    // 結帳小計
-    checkoutSubtotal: (state) => {
-      return state.checkout.items.reduce((sum, item) => {
-        return sum + item.price * item.quantity;
-      }, 0);
-    },
-
-    // 結帳運費
-    checkoutShippingFee: (state) => {
-      if (!state.checkout.shippingMethod) return 0;
-      return state.checkout.shippingMethod.fee || 0;
-    },
-
-    // 結帳折扣
-    checkoutDiscount: (state) => {
-      if (!state.checkout.coupon) return 0;
-
-      const subtotal = state.checkout.items.reduce((sum, item) => {
-        return sum + item.price * item.quantity;
-      }, 0);
-
-      if (state.checkout.coupon.type === "percentage") {
-        return Math.floor((subtotal * state.checkout.coupon.value) / 100);
-      } else if (state.checkout.coupon.type === "fixed") {
-        return state.checkout.coupon.value;
-      }
-
-      return 0;
-    },
-
-    // 結帳總計
-    checkoutTotal: (state, getters) => {
-      return Math.max(
-        0,
-        getters.checkoutSubtotal +
-          getters.checkoutShippingFee -
-          getters.checkoutDiscount
-      );
-    },
-
-    // 是否正在載入
-    isLoading: (state) => state.loading,
-
-    // 是否有錯誤
-    hasError: (state) => state.error !== null,
+// 找不到既有訂單資料時使用的預設值（第一次使用時的展示資料）
+const DEFAULT_ORDERS = [
+  {
+    id: 1,
+    orderNumber: "LV20260710-1042",
+    status: "pending",
+    createdAt: "2026-07-10",
+    trackingNumber: null,
+    hasReviewed: false,
+    totalAmount: 6980,
+    items: [
+      { id: 1, productId: 1, name: "紳士格調經典牛津皮鞋", image: "/images/product-1.jpg", quantity: 1, price: 6980 },
+    ],
   },
-
-  actions: {
-    // ==================== 訂單管理 ====================
-
-    // 獲取訂單列表
-    async fetchOrders() {
-      this.loading = true;
-      this.error = null;
-
-      try {
-        // TODO: 實際的 API 呼叫
-        // const response = await fetch('/api/orders')
-        // const data = await response.json()
-
-        // 模擬 API 請求
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // 模擬資料
-        this.orders = [
-          {
-            id: 1,
-            orderNumber: "ORD20240103001",
-            status: "completed",
-            createdAt: "2024-01-03 14:30",
-            items: [
-              {
-                id: 1,
-                productId: 1,
-                name: "【Luvo】紳士格調經典牛津皮鞋",
-                image: "/images/product-1.jpg",
-                price: 6980,
-                quantity: 1,
-                size: "42",
-                color: "黑色",
-              },
-            ],
-            subtotal: 6980,
-            shippingFee: 0,
-            discount: 0,
-            total: 6980,
-            shippingAddress: {
-              name: "王小明",
-              phone: "0912345678",
-              address: "106 台北市大安區忠孝東路四段 123 號 5 樓",
-            },
-            paymentMethod: "credit_card",
-            trackingNumber: null,
-            reviewed: false,
-          },
-        ];
-
-        this.updateStatistics();
-      } catch (error) {
-        this.error = error.message;
-        console.error("獲取訂單失敗:", error);
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    // 獲取單一訂單
-    async fetchOrder(orderId) {
-      this.loading = true;
-      this.error = null;
-
-      try {
-        // TODO: 實際的 API 呼叫
-        // const response = await fetch(`/api/orders/${orderId}`)
-        // const data = await response.json()
-
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        const order = this.orders.find((o) => o.id === orderId);
-        this.currentOrder = order || null;
-
-        return order;
-      } catch (error) {
-        this.error = error.message;
-        console.error("獲取訂單失敗:", error);
-        return null;
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    // 建立訂單
-    async createOrder(orderData) {
-      this.loading = true;
-      this.error = null;
-
-      try {
-        // TODO: 實際的 API 呼叫
-        // const response = await fetch('/api/orders', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(orderData)
-        // })
-        // const data = await response.json()
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // 模擬建立訂單
-        const newOrder = {
-          id: Date.now(),
-          orderNumber: `ORD${Date.now()}`,
-          status: "pending",
-          createdAt: new Date().toLocaleString("zh-TW"),
-          ...orderData,
-        };
-
-        this.orders.unshift(newOrder);
-        this.updateStatistics();
-
-        return newOrder;
-      } catch (error) {
-        this.error = error.message;
-        console.error("建立訂單失敗:", error);
-        throw error;
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    // 更新訂單狀態
-    async updateOrderStatus(orderId, status) {
-      this.loading = true;
-      this.error = null;
-
-      try {
-        // TODO: 實際的 API 呼叫
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        const order = this.orders.find((o) => o.id === orderId);
-        if (order) {
-          order.status = status;
-          this.updateStatistics();
-        }
-
-        return order;
-      } catch (error) {
-        this.error = error.message;
-        console.error("更新訂單狀態失敗:", error);
-        throw error;
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    // 取消訂單
-    async cancelOrder(orderId, reason = "") {
-      return this.updateOrderStatus(orderId, "cancelled");
-    },
-
-    // 確認收貨
-    async confirmReceipt(orderId) {
-      return this.updateOrderStatus(orderId, "completed");
-    },
-
-    // 申請退款
-    async requestRefund(orderId, reason = "") {
-      this.loading = true;
-      this.error = null;
-
-      try {
-        // TODO: 實際的 API 呼叫
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        const order = this.orders.find((o) => o.id === orderId);
-        if (order) {
-          order.status = "refunded";
-          order.refundReason = reason;
-          this.updateStatistics();
-        }
-
-        return order;
-      } catch (error) {
-        this.error = error.message;
-        console.error("申請退款失敗:", error);
-        throw error;
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    // 刪除訂單
-    async deleteOrder(orderId) {
-      try {
-        const index = this.orders.findIndex((o) => o.id === orderId);
-        if (index > -1) {
-          this.orders.splice(index, 1);
-          this.updateStatistics();
-        }
-      } catch (error) {
-        this.error = error.message;
-        console.error("刪除訂單失敗:", error);
-      }
-    },
-
-    // 更新訂單統計
-    updateStatistics() {
-      this.statistics.total = this.orders.length;
-      this.statistics.pending = this.orders.filter(
-        (o) => o.status === "pending"
-      ).length;
-      this.statistics.processing = this.orders.filter(
-        (o) => o.status === "processing"
-      ).length;
-      this.statistics.shipped = this.orders.filter(
-        (o) => o.status === "shipped"
-      ).length;
-      this.statistics.completed = this.orders.filter(
-        (o) => o.status === "completed"
-      ).length;
-      this.statistics.cancelled = this.orders.filter(
-        (o) => o.status === "cancelled"
-      ).length;
-      this.statistics.refunded = this.orders.filter(
-        (o) => o.status === "refunded"
-      ).length;
-    },
-
-    // ==================== 結帳流程 ====================
-
-    // 初始化結帳
-    initCheckout(items) {
-      this.checkout.items = items.map((item) => ({ ...item }));
-    },
-
-    // 設定收件地址
-    setShippingAddress(address) {
-      this.checkout.shippingAddress = address;
-    },
-
-    // 設定帳單地址
-    setBillingAddress(address) {
-      this.checkout.billingAddress = address;
-    },
-
-    // 設定付款方式
-    setPaymentMethod(method) {
-      this.checkout.paymentMethod = method;
-    },
-
-    // 設定運送方式
-    setShippingMethod(method) {
-      this.checkout.shippingMethod = method;
-    },
-
-    // 套用優惠券
-    applyCoupon(coupon) {
-      this.checkout.coupon = coupon;
-    },
-
-    // 移除優惠券
-    removeCoupon() {
-      this.checkout.coupon = null;
-    },
-
-    // 設定訂單備註
-    setOrderNote(note) {
-      this.checkout.note = note;
-    },
-
-    // 完成結帳
-    async completeCheckout() {
-      this.loading = true;
-      this.error = null;
-
-      try {
-        const orderData = {
-          items: this.checkout.items,
-          shippingAddress: this.checkout.shippingAddress,
-          billingAddress:
-            this.checkout.billingAddress || this.checkout.shippingAddress,
-          paymentMethod: this.checkout.paymentMethod,
-          shippingMethod: this.checkout.shippingMethod,
-          coupon: this.checkout.coupon,
-          note: this.checkout.note,
-          subtotal: this.checkoutSubtotal,
-          shippingFee: this.checkoutShippingFee,
-          discount: this.checkoutDiscount,
-          total: this.checkoutTotal,
-        };
-
-        const order = await this.createOrder(orderData);
-        this.clearCheckout();
-
-        return order;
-      } catch (error) {
-        this.error = error.message;
-        throw error;
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    // 清除結帳資料
-    clearCheckout() {
-      this.checkout = {
-        items: [],
-        shippingAddress: null,
-        billingAddress: null,
-        paymentMethod: null,
-        shippingMethod: null,
-        coupon: null,
-        note: "",
-      };
-    },
-
-    // ==================== 其他功能 ====================
-
-    // 再次購買
-    async reorder(orderId) {
-      const order = this.orders.find((o) => o.id === orderId);
-      if (!order) return;
-
-      // 將訂單商品加入購物車
-      // TODO: 整合購物車 Store
-      return order.items;
-    },
-
-    // 清除錯誤訊息
-    clearError() {
-      this.error = null;
-    },
+  {
+    id: 2,
+    orderNumber: "LV20260705-3387",
+    status: "processing",
+    createdAt: "2026-07-05",
+    trackingNumber: null,
+    hasReviewed: false,
+    totalAmount: 12660,
+    items: [
+      { id: 2, productId: 5, name: "都會型男樂福鞋", image: "/images/product-5.jpg", quantity: 1, price: 5400 },
+      { id: 3, productId: 102, name: "工裝馬丁靴", image: "/images/product-11.jpg", quantity: 1, price: 7260 },
+    ],
   },
+  {
+    id: 3,
+    orderNumber: "LV20260628-8821",
+    status: "shipped",
+    createdAt: "2026-06-28",
+    trackingNumber: "TW1234567890",
+    hasReviewed: false,
+    totalAmount: 8980,
+    items: [
+      { id: 4, productId: 101, name: "經典切爾西靴", image: "/images/product-10.jpg", quantity: 1, price: 8980 },
+    ],
+  },
+  {
+    id: 4,
+    orderNumber: "LV20260610-1195",
+    status: "completed",
+    createdAt: "2026-06-10",
+    trackingNumber: "TW1234567800",
+    hasReviewed: false,
+    totalAmount: 3980,
+    items: [
+      { id: 5, productId: 201, name: "時尚休閒運動鞋", image: "/images/casual-1.jpg", quantity: 1, price: 3980 },
+    ],
+  },
+  {
+    id: 5,
+    orderNumber: "LV20260528-4470",
+    status: "completed",
+    createdAt: "2026-05-28",
+    trackingNumber: "TW1234567711",
+    hasReviewed: true,
+    totalAmount: 4980,
+    items: [
+      { id: 6, productId: 2, name: "摩登時尚簡約牛津皮鞋", image: "/images/product-2.jpg", quantity: 1, price: 4980 },
+    ],
+  },
+  {
+    id: 6,
+    orderNumber: "LV20260510-7734",
+    status: "cancelled",
+    createdAt: "2026-05-10",
+    trackingNumber: null,
+    hasReviewed: false,
+    totalAmount: 6280,
+    items: [
+      { id: 7, productId: 103, name: "經典沙漠靴", image: "/images/product-12.jpg", quantity: 1, price: 6280 },
+    ],
+  },
+];
+
+/**
+ * 訂單 Store
+ *
+ * 前端展示用，訂單資料以 localStorage 持久化，讓 Orders.vue 的取消 / 確認收貨
+ * 操作在重新整理頁面後仍會保留，取代先前寫死在頁面內、重整就消失的 mock 資料。
+ */
+export const useOrderStore = defineStore("order", () => {
+  const orders = ref(loadFromStorage(ORDERS_STORAGE_KEY, DEFAULT_ORDERS));
+
+  const persist = () => {
+    saveToStorage(ORDERS_STORAGE_KEY, orders.value);
+  };
+
+  const getOrderById = (id) => {
+    const numericId = Number(id);
+    return orders.value.find((order) => order.id === numericId) || null;
+  };
+
+  // 依狀態統計數量，後台儀表板 / 訂單管理頁可直接使用
+  const countByStatus = computed(() => {
+    const counts = { pending: 0, processing: 0, shipped: 0, completed: 0, cancelled: 0 };
+    orders.value.forEach((order) => {
+      if (counts[order.status] !== undefined) {
+        counts[order.status] += 1;
+      }
+    });
+    return counts;
+  });
+
+  // 從購物車結帳建立新訂單（Checkout.vue 完成後串接這裡）
+  const createOrder = ({ items, totalAmount }) => {
+    const newOrder = {
+      id: Math.max(0, ...orders.value.map((o) => o.id)) + 1,
+      orderNumber: generateOrderNumber(),
+      status: "pending",
+      createdAt: new Date().toISOString().slice(0, 10),
+      trackingNumber: null,
+      hasReviewed: false,
+      totalAmount,
+      items,
+    };
+    orders.value.unshift(newOrder);
+    persist();
+    return newOrder;
+  };
+
+  const updateStatus = (id, status) => {
+    const order = getOrderById(id);
+    if (!order) return;
+    order.status = status;
+    persist();
+  };
+
+  const cancelOrder = (id) => {
+    updateStatus(id, "cancelled");
+  };
+
+  const confirmReceipt = (id) => {
+    updateStatus(id, "completed");
+  };
+
+  const markReviewed = (id) => {
+    const order = getOrderById(id);
+    if (!order) return;
+    order.hasReviewed = true;
+    persist();
+  };
+
+  return {
+    orders,
+    countByStatus,
+    getOrderById,
+    createOrder,
+    updateStatus,
+    cancelOrder,
+    confirmReceipt,
+    markReviewed,
+  };
 });

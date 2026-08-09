@@ -266,27 +266,7 @@ npm install
 yarn install
 ```
 
-#### 3. 環境配置（選用）
-
-目前專案為純前端展示，.env 內的變數暫未實際生效，僅為未來串接後端時預留設定。若不打算串接後端，可略過此步驟直接啟動。
-
-```
-# 創建環境配置文件
-cp .env.example .env
-```
-
-```
-# 預留：未來串接後端 API 時使用
-VITE_API_BASE_URL=http://localhost:3000/api
-
-# 上傳文件大小限制 (MB)
-VITE_MAX_FILE_SIZE=5
-
-# 應用標題
-VITE_APP_TITLE=Luvo 履藝皮鞋
-```
-
-#### 4. 啟動開發服務
+#### 3. 啟動開發服務
 
 ```
 npm run dev

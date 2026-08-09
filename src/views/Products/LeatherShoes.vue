@@ -89,110 +89,16 @@
 
       <!-- 商品列表 -->
       <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
-        <router-link
+        <ProductCard
           v-for="product in filteredProducts"
           :key="product.id"
-          :to="`/products/detail/${product.id}`"
-          class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 group block"
-        >
-          <div class="relative aspect-square overflow-hidden bg-gray-200">
-            <img
-              :src="product.image"
-              :alt="product.name"
-              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            />
-            <div class="absolute top-4 left-4 flex flex-col gap-2">
-              <span
-                v-if="product.isNew"
-                class="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full"
-              >
-                NEW
-              </span>
-              <span
-                v-if="product.discount"
-                class="px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full"
-              >
-                -{{ product.discount }}%
-              </span>
-            </div>
-            <button
-              @click.stop.prevent="toggleFavorite(product.id)"
-              :aria-label="isFavorite(product.id) ? `取消收藏 ${product.name}` : `收藏 ${product.name}`"
-              class="absolute top-4 right-4 p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <svg
-                class="w-5 h-5"
-                :class="
-                  isFavorite(product.id)
-                    ? 'text-red-500 fill-current'
-                    : 'text-gray-400'
-                "
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div class="p-4">
-            <div class="mb-2">
-              <span class="text-xs text-gray-500">{{
-                getStyleText(product.style)
-              }}</span>
-            </div>
-            <h3 class="text-lg font-bold text-gray-800 mb-2 line-clamp-2">
-              {{ product.name }}
-            </h3>
-            <div class="flex items-center gap-2 mb-3">
-              <div class="flex gap-1">
-                <span v-for="i in 5" :key="i" class="text-yellow-400">
-                  <svg
-                    class="w-4 h-4"
-                    :class="i <= product.rating ? 'fill-current' : ''"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                    />
-                  </svg>
-                </span>
-              </div>
-              <span class="text-xs text-gray-500">({{ product.reviews }})</span>
-            </div>
-            <p class="text-sm text-gray-600 mb-3">{{ product.material }}</p>
-            <div class="flex items-end justify-between">
-              <div>
-                <p class="text-2xl font-bold text-amber-800">
-                  NT$ {{ formatPrice(product.price) }}
-                </p>
-                <p
-                  v-if="product.originalPrice"
-                  class="text-sm text-gray-400 line-through"
-                >
-                  NT$ {{ formatPrice(product.originalPrice) }}
-                </p>
-              </div>
-            </div>
-            <button
-              @click.stop.prevent="addToCart(product)"
-              class="w-full mt-4 px-4 py-3 bg-amber-800 text-white rounded-lg hover:bg-amber-900 transition-colors font-medium"
-            >
-              加入購物車
-            </button>
-          </div>
-        </router-link>
+          :product="product"
+          :is-favorited="userStore.isFavorited(product.id)"
+          :adding="addingId === product.id"
+          @add-to-cart="handleAddToCart"
+          @toggle-favorite="(p) => userStore.toggleFavorite(p.id)"
+          @quick-view="handleQuickView"
+        />
       </div>
 
       <!-- 空狀態 -->
@@ -227,156 +133,29 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { computed } from "vue";
+import ProductCard from "@/components/business/ProductCard.vue";
+import { useCartStore } from "@/stores/useCartStore";
+import { useUserStore } from "@/stores/useUserStore";
+import { useProductStore } from "@/stores/useProductStore";
 
-const products = ref([
-  {
-    id: 1,
-    name: "紳士格調經典牛津皮鞋",
-    price: 6980,
-    originalPrice: 7980,
-    style: "oxford",
-    color: "black",
-    material: "頭層牛皮",
-    rating: 5,
-    reviews: 156,
-    image: "/images/product-1.jpg",
-    isNew: false,
-    discount: 13,
-  },
-  {
-    id: 2,
-    name: "摩登時尚簡約牛津皮鞋",
-    price: 4980,
-    originalPrice: null,
-    style: "oxford",
-    color: "brown",
-    material: "頭層牛皮",
-    rating: 4,
-    reviews: 134,
-    image: "/images/product-2.jpg",
-    isNew: true,
-    discount: 0,
-  },
-  {
-    id: 3,
-    name: "復古風範雕花牛津皮鞋",
-    price: 7980,
-    originalPrice: 8980,
-    style: "oxford",
-    color: "burgundy",
-    material: "頭層牛皮 + 手工雕花",
-    rating: 5,
-    reviews: 98,
-    image: "/images/product-3.jpg",
-    isNew: true,
-    discount: 11,
-  },
-  {
-    id: 4,
-    name: "商務精英德比皮鞋",
-    price: 5980,
-    originalPrice: null,
-    style: "derby",
-    color: "black",
-    material: "頭層牛皮",
-    rating: 4,
-    reviews: 87,
-    image: "/images/product-4.jpg",
-    isNew: false,
-    discount: 0,
-  },
-  {
-    id: 5,
-    name: "都會型男樂福鞋",
-    price: 5400,
-    originalPrice: null,
-    style: "loafer",
-    color: "brown",
-    material: "小牛皮",
-    rating: 5,
-    reviews: 76,
-    image: "/images/product-5.jpg",
-    isNew: true,
-    discount: 0,
-  },
-  {
-    id: 6,
-    name: "義式經典樂福鞋",
-    price: 8800,
-    originalPrice: 9800,
-    style: "loafer",
-    color: "tan",
-    material: "義大利進口小牛皮",
-    rating: 5,
-    reviews: 112,
-    image: "/images/product-6.jpg",
-    isNew: false,
-    discount: 10,
-  },
-  {
-    id: 7,
-    name: "雙扣孟克鞋",
-    price: 7680,
-    originalPrice: null,
-    style: "monk",
-    color: "brown",
-    material: "頭層牛皮",
-    rating: 4,
-    reviews: 64,
-    image: "/images/product-7.jpg",
-    isNew: true,
-    discount: 0,
-  },
-  {
-    id: 8,
-    name: "紳士雕花德比鞋",
-    price: 6780,
-    originalPrice: 7580,
-    style: "derby",
-    color: "burgundy",
-    material: "頭層牛皮 + 雕花",
-    rating: 5,
-    reviews: 89,
-    image: "/images/product-8.jpg",
-    isNew: false,
-    discount: 11,
-  },
-  {
-    id: 9,
-    name: "時尚尖頭牛津鞋",
-    price: 5880,
-    originalPrice: null,
-    style: "oxford",
-    color: "black",
-    material: "漆皮",
-    rating: 4,
-    reviews: 45,
-    image: "/images/product-9.jpg",
-    isNew: true,
-    discount: 0,
-  },
-]);
+const cartStore = useCartStore();
+const userStore = useUserStore();
+const productStore = useProductStore();
+
+const products = computed(() =>
+  productStore.getProductsByCategory("leather-shoes")
+);
 
 const filterStyle = ref("");
 const filterColor = ref("");
 const filterPrice = ref("");
 const sortBy = ref("default");
 
-// 收藏清單改用 localStorage，跨頁面 / 重新整理都會保留
-const FAVORITES_KEY = "luvo-favorites";
-const loadFavorites = () => {
-  try {
-    const stored = localStorage.getItem(FAVORITES_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-};
-const favorites = ref(loadFavorites());
-
+const addingId = ref(null);
 const toastMessage = ref("");
 let toastTimer = null;
+
 const showToast = (message) => {
   toastMessage.value = message;
   clearTimeout(toastTimer);
@@ -419,36 +198,23 @@ const filteredProducts = computed(() => {
   return result;
 });
 
-const getStyleText = (style) => {
-  const styles = {
-    oxford: "牛津鞋",
-    derby: "德比鞋",
-    loafer: "樂福鞋",
-    monk: "孟克鞋",
-  };
-  return styles[style] || style;
-};
+// 加入購物車：先寫入 cartStore，再顯示提示
+const handleAddToCart = async (product) => {
+  if (product.stock === 0) return;
 
-const formatPrice = (price) => {
-  return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
+  addingId.value = product.id;
 
-const isFavorite = (id) => {
-  return favorites.value.includes(id);
-};
+  // 保留短暫延遲營造真實的「處理中」感受，未來串接真正的 API 時可直接替換這段
+  await new Promise((resolve) => setTimeout(resolve, 400));
 
-const toggleFavorite = (id) => {
-  const index = favorites.value.indexOf(id);
-  if (index > -1) {
-    favorites.value.splice(index, 1);
-  } else {
-    favorites.value.push(id);
-  }
-  localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites.value));
-};
-
-const addToCart = (product) => {
+  cartStore.addItem(product);
   showToast(`已將「${product.name}」加入購物車`);
+  addingId.value = null;
+};
+
+const handleQuickView = (product) => {
+  // 快速查看的實作交由後續補上 Modal 顯示商品簡要資訊
+  console.log("quick view", product);
 };
 </script>
 
