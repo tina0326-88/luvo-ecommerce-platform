@@ -144,7 +144,7 @@ const userStore = useUserStore();
 const productStore = useProductStore();
 
 const products = computed(() =>
-  productStore.getProductsByCategory("leather-shoes")
+  productStore.getProductsByCategory("leather-shoes"),
 );
 
 const filterStyle = ref("");

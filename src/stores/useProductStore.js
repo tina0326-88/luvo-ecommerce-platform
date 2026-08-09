@@ -782,6 +782,9 @@ export const useProductStore = defineStore("product", () => {
     "leather-shoes": "皮鞋系列",
     boots: "靴子系列",
     "casual-shoes": "休閒鞋系列",
+    socks: "襪子",
+    belts: "皮帶",
+    bags: "包款系列",
   };
 
   // 依 id 取得單一商品
