@@ -54,7 +54,6 @@ const routes = [
     component: () => import("@/views/Accessories/Bags.vue"),
     meta: { title: "包款系列" },
   },
-
   {
     path: "/stores",
     name: "Stores",
@@ -125,35 +124,35 @@ const routes = [
   },
 
   // 後台管理
-{
-  path: "/admin",
-  component: () => import("@/views/Admin/AdminLayout.vue"),
-  meta: { requiresAuth: true, requiresAdmin: true, hideDefaultLayout: true },
-  children: [
-    {
-      path: "",
-      redirect: { name: "AdminDashboard" },
-    },
-    {
-      path: "dashboard",
-      name: "AdminDashboard",
-      component: () => import("@/views/Admin/Dashboard.vue"),
-      meta: { title: "儀表板" },
-    },
-    {
-      path: "products",
-      name: "AdminProducts",
-      component: () => import("@/views/Admin/ProductManage.vue"),
-      meta: { title: "商品管理" },
-    },
-    {
-      path: "orders",
-      name: "AdminOrders",
-      component: () => import("@/views/Admin/OrderManage.vue"),
-      meta: { title: "訂單管理" },
-    },
-  ],
-},
+  {
+    path: "/admin",
+    component: () => import("@/views/Admin/AdminLayout.vue"),
+    meta: { requiresAuth: true, requiresAdmin: true, hideDefaultLayout: true },
+    children: [
+      {
+        path: "",
+        redirect: { name: "AdminDashboard" },
+      },
+      {
+        path: "dashboard",
+        name: "AdminDashboard",
+        component: () => import("@/views/Admin/Dashboard.vue"),
+        meta: { title: "儀表板" },
+      },
+      {
+        path: "products",
+        name: "AdminProducts",
+        component: () => import("@/views/Admin/ProductManage.vue"),
+        meta: { title: "商品管理" },
+      },
+      {
+        path: "orders",
+        name: "AdminOrders",
+        component: () => import("@/views/Admin/OrderManage.vue"),
+        meta: { title: "訂單管理" },
+      },
+    ],
+  },
 
   // 404
   {

@@ -178,7 +178,7 @@ watch(
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKeydown);
     }
-  }
+  },
 );
 
 // 元件被卸載時（例如切換路由）務必還原捲動，避免其他頁面被鎖死

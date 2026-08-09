@@ -27,6 +27,7 @@ const route = useRoute();
 .page-fade-leave-active {
   transition: opacity 0.2s ease;
 }
+
 .page-fade-enter-from,
 .page-fade-leave-to {
   opacity: 0;

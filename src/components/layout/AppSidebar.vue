@@ -4,7 +4,9 @@
     :class="collapsed ? 'w-20' : 'w-64'"
   >
     <!-- Logo 區 -->
-    <div class="h-16 flex items-center justify-between px-4 border-b border-gray-800">
+    <div
+      class="h-16 flex items-center justify-between px-4 border-b border-gray-800"
+    >
       <router-link
         to="/admin/dashboard"
         class="text-white font-bold text-xl"
@@ -17,7 +19,12 @@
         :aria-label="collapsed ? '展開選單' : '收合選單'"
         @click="$emit('toggle-collapsed')"
       >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             v-if="collapsed"
             stroke-linecap="round"
@@ -69,7 +76,12 @@
         class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
         @click="$emit('logout-request')"
       >
-        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          class="w-5 h-5 shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -101,7 +113,6 @@ const route = useRoute();
 const userStore = useUserStore();
 
 // 簡易 icon：用 render function 就地產生 SVG，避免額外引入 icon 套件
-// 之後若專案正式安裝 lucide-vue-next 之類的套件，這裡可以直接換成該套件的元件
 const makeIcon = (pathD) => ({
   render: () =>
     h(
@@ -118,7 +129,7 @@ const makeIcon = (pathD) => ({
           "stroke-width": "2",
           d: pathD,
         }),
-      ]
+      ],
     ),
 });
 
@@ -126,17 +137,23 @@ const navItems = [
   {
     to: "/admin/dashboard",
     label: "儀表板",
-    icon: makeIcon("M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"),
+    icon: makeIcon(
+      "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+    ),
   },
   {
     to: "/admin/products",
     label: "商品管理",
-    icon: makeIcon("M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"),
+    icon: makeIcon(
+      "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4",
+    ),
   },
   {
     to: "/admin/orders",
     label: "訂單管理",
-    icon: makeIcon("M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"),
+    icon: makeIcon(
+      "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
+    ),
   },
 ];
 

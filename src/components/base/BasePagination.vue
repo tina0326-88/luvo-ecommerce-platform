@@ -161,7 +161,6 @@ const handleNext = () => {
 // 處理頁碼變更
 const handlePageChange = (page) => {
   if (page === "..." || page === props.currentPage) return;
-
   emit("update:currentPage", page);
   emit("change", page);
 

@@ -215,7 +215,7 @@ defineEmits([
   "buy-again",
 ]);
 
-// 狀態文字與徽章顏色（顏色一律搭配文字說明，不單靠顏色傳達狀態）
+// 狀態文字與徽章顏色
 const statusMap = {
   pending: { text: "待付款", class: "bg-yellow-500" },
   processing: { text: "處理中", class: "bg-blue-500" },
@@ -248,7 +248,6 @@ const formattedDate = computed(() => {
   });
 });
 
-// 建議之後移到 utils/helpers.js 統一管理，這裡先就地實作方便直接複製貼上
 const formatPrice = (price) => {
   return (price ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };

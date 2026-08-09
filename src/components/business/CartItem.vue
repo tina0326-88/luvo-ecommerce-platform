@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200">
+  <div
+    class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200"
+  >
     <div class="flex flex-col sm:flex-row gap-4">
       <!-- 商品圖片 -->
       <div class="flex-shrink-0">
@@ -106,8 +108,18 @@
               aria-label="減少數量"
               class="px-3 py-2 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20 12H4"
+                />
               </svg>
             </button>
 
@@ -127,8 +139,18 @@
               aria-label="增加數量"
               class="px-3 py-2 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
             </button>
           </div>
@@ -161,8 +183,18 @@
               aria-label="減少數量"
               class="px-3 py-2 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20 12H4"
+                />
               </svg>
             </button>
 
@@ -182,8 +214,18 @@
               aria-label="增加數量"
               class="px-3 py-2 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
             </button>
           </div>
@@ -197,9 +239,7 @@
 
         <!-- 庫存警告 -->
         <div v-if="item.stock !== undefined && item.stock < 5" class="mt-2">
-          <span class="text-xs text-red-600">
-            ⚠️ 僅剩 {{ item.stock }} 件
-          </span>
+          <span class="text-xs text-red-600"> 僅剩 {{ item.stock }} 件 </span>
         </div>
       </div>
     </div>
@@ -233,18 +273,16 @@ const props = defineProps({
   },
 });
 
-// update:quantity 用於數量變更；remove-request 只發出「使用者想移除」的意圖，
-// 實際確認與刪除交給父層（搭配 BaseModal）處理，元件本身不彈原生 confirm()
+// update:quantity 用於數量變更
 const emit = defineEmits(["update:quantity", "remove-request"]);
-
 const tempQuantity = ref(props.item.quantity);
 
-// 監聽 item.quantity 變化（例如父層因庫存調整而改動）
+// 監聽 item.quantity 變化
 watch(
   () => props.item.quantity,
   (newVal) => {
     tempQuantity.value = newVal;
-  }
+  },
 );
 
 // 增加數量
@@ -263,7 +301,7 @@ const handleDecrement = () => {
   }
 };
 
-// 手動輸入數量：輸入當下直接反映在畫面上（修正原本輸入框綁定 prop 導致打字沒反應的問題）
+// 手動輸入數量：輸入當下直接反映在畫面上
 const handleQuantityInput = (event) => {
   const value = event.target.value;
   if (/^\d*$/.test(value)) {
@@ -276,21 +314,17 @@ const handleQuantityInput = (event) => {
 // 失去焦點時驗證並更新數量
 const handleQuantityBlur = () => {
   let value = parseInt(tempQuantity.value, 10) || 1;
-
   if (value < 1) {
     value = 1;
   } else if (value > props.maxQuantity) {
     value = props.maxQuantity;
   }
-
   tempQuantity.value = value;
-
   if (value !== props.item.quantity) {
     emit("update:quantity", { id: props.item.id, quantity: value });
   }
 };
 
-// 建議之後移到 utils/helpers.js 統一管理，這裡先就地實作方便直接複製貼上
 const formatPrice = (price) => {
   return (price ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };

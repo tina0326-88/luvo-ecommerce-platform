@@ -81,51 +81,61 @@ const props = defineProps({
     type: [String, Number],
     default: "",
   },
+
   // 輸入框類型
   type: {
     type: String,
     default: "text",
   },
+
   // 標籤文字
   label: {
     type: String,
     default: "",
   },
+
   // 佔位符
   placeholder: {
     type: String,
     default: "",
   },
+
   // 提示訊息
   hint: {
     type: String,
     default: "",
   },
+
   // 錯誤訊息
   error: {
     type: String,
     default: "",
   },
+
   // 是否禁用
   disabled: {
     type: Boolean,
     default: false,
   },
+
   // 是否唯讀
   readonly: {
     type: Boolean,
     default: false,
   },
+
   // 是否必填
   required: {
     type: Boolean,
     default: false,
   },
+
   // 是否顯示清除按鈕
   clearable: {
     type: Boolean,
     default: false,
   },
+
   // 輸入框尺寸
   size: {
     type: String,
@@ -168,6 +178,7 @@ const inputClasses = computed(() => {
   if (slots.prefix) {
     classes.push("pl-10");
   }
+
   if (slots.suffix || showClearButton.value) {
     classes.push("pr-10");
   }
@@ -176,9 +187,7 @@ const inputClasses = computed(() => {
   if (props.error) {
     classes.push("border-red-300 focus:border-red-500 focus:ring-red-500");
   } else {
-    classes.push(
-      "border-gray-300 focus:border-amber-500 focus:ring-amber-500"
-    );
+    classes.push("border-gray-300 focus:border-amber-500 focus:ring-amber-500");
   }
 
   return classes.join(" ");

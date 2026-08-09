@@ -5,12 +5,6 @@ import { loadFromStorage, saveToStorage } from "@/utils/helpers";
 const USER_STORAGE_KEY = "luvo-user";
 const FAVORITES_STORAGE_KEY = "luvo-favorites";
 
-/**
- * 專案目前未串接真實後端，這裡的帳號驗證是「前端模擬」：
- * 僅比對下方寫死的展示帳號，不做任何真正的身分驗證，
- * 純粹讓登入流程的 UI／路由守衛（router/guards.js）有東西可以測試。
- * 對應 README「測試帳號」章節的說明。
- */
 const MOCK_ACCOUNTS = [
   {
     email: "demo@luvo.com",
@@ -36,7 +30,7 @@ export const useUserStore = defineStore("user", () => {
   // 模擬登入：比對展示帳號，成功則寫入 localStorage 維持登入狀態
   const login = ({ email, password }) => {
     const matched = MOCK_ACCOUNTS.find(
-      (account) => account.email === email && account.password === password
+      (account) => account.email === email && account.password === password,
     );
 
     if (!matched) {

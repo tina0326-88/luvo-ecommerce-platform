@@ -46,27 +46,32 @@ const props = defineProps({
     validator: (value) =>
       ["primary", "secondary", "outline", "text", "danger"].includes(value),
   },
+
   // 按鈕尺寸：sm, md, lg
   size: {
     type: String,
     default: "md",
     validator: (value) => ["sm", "md", "lg"].includes(value),
   },
+
   // HTML type 屬性
   type: {
     type: String,
     default: "button",
   },
+
   // 是否禁用
   disabled: {
     type: Boolean,
     default: false,
   },
+
   // 是否載入中
   loading: {
     type: Boolean,
     default: false,
   },
+
   // 是否為區塊級按鈕
   block: {
     type: Boolean,
@@ -107,7 +112,6 @@ const buttonClasses = computed(() => {
   if (props.block) {
     classes.push("w-full");
   }
-
   return classes.join(" ");
 });
 

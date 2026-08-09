@@ -1,6 +1,10 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
-import { loadFromStorage, saveToStorage, generateOrderNumber } from "@/utils/helpers";
+import {
+  loadFromStorage,
+  saveToStorage,
+  generateOrderNumber,
+} from "@/utils/helpers";
 
 const ORDERS_STORAGE_KEY = "luvo-orders";
 
@@ -15,7 +19,14 @@ const DEFAULT_ORDERS = [
     hasReviewed: false,
     totalAmount: 6980,
     items: [
-      { id: 1, productId: 1, name: "紳士格調經典牛津皮鞋", image: "/images/product-1.jpg", quantity: 1, price: 6980 },
+      {
+        id: 1,
+        productId: 1,
+        name: "紳士格調經典牛津皮鞋",
+        image: "/images/product-1.jpg",
+        quantity: 1,
+        price: 6980,
+      },
     ],
   },
   {
@@ -27,8 +38,22 @@ const DEFAULT_ORDERS = [
     hasReviewed: false,
     totalAmount: 12660,
     items: [
-      { id: 2, productId: 5, name: "都會型男樂福鞋", image: "/images/product-5.jpg", quantity: 1, price: 5400 },
-      { id: 3, productId: 102, name: "工裝馬丁靴", image: "/images/product-11.jpg", quantity: 1, price: 7260 },
+      {
+        id: 2,
+        productId: 5,
+        name: "都會型男樂福鞋",
+        image: "/images/product-5.jpg",
+        quantity: 1,
+        price: 5400,
+      },
+      {
+        id: 3,
+        productId: 102,
+        name: "工裝馬丁靴",
+        image: "/images/product-11.jpg",
+        quantity: 1,
+        price: 7260,
+      },
     ],
   },
   {
@@ -40,7 +65,14 @@ const DEFAULT_ORDERS = [
     hasReviewed: false,
     totalAmount: 8980,
     items: [
-      { id: 4, productId: 101, name: "經典切爾西靴", image: "/images/product-10.jpg", quantity: 1, price: 8980 },
+      {
+        id: 4,
+        productId: 101,
+        name: "經典切爾西靴",
+        image: "/images/product-10.jpg",
+        quantity: 1,
+        price: 8980,
+      },
     ],
   },
   {
@@ -52,7 +84,14 @@ const DEFAULT_ORDERS = [
     hasReviewed: false,
     totalAmount: 3980,
     items: [
-      { id: 5, productId: 201, name: "時尚休閒運動鞋", image: "/images/casual-1.jpg", quantity: 1, price: 3980 },
+      {
+        id: 5,
+        productId: 201,
+        name: "時尚休閒運動鞋",
+        image: "/images/casual-1.jpg",
+        quantity: 1,
+        price: 3980,
+      },
     ],
   },
   {
@@ -64,7 +103,14 @@ const DEFAULT_ORDERS = [
     hasReviewed: true,
     totalAmount: 4980,
     items: [
-      { id: 6, productId: 2, name: "摩登時尚簡約牛津皮鞋", image: "/images/product-2.jpg", quantity: 1, price: 4980 },
+      {
+        id: 6,
+        productId: 2,
+        name: "摩登時尚簡約牛津皮鞋",
+        image: "/images/product-2.jpg",
+        quantity: 1,
+        price: 4980,
+      },
     ],
   },
   {
@@ -76,17 +122,18 @@ const DEFAULT_ORDERS = [
     hasReviewed: false,
     totalAmount: 6280,
     items: [
-      { id: 7, productId: 103, name: "經典沙漠靴", image: "/images/product-12.jpg", quantity: 1, price: 6280 },
+      {
+        id: 7,
+        productId: 103,
+        name: "經典沙漠靴",
+        image: "/images/product-12.jpg",
+        quantity: 1,
+        price: 6280,
+      },
     ],
   },
 ];
 
-/**
- * 訂單 Store
- *
- * 前端展示用，訂單資料以 localStorage 持久化，讓 Orders.vue 的取消 / 確認收貨
- * 操作在重新整理頁面後仍會保留，取代先前寫死在頁面內、重整就消失的 mock 資料。
- */
 export const useOrderStore = defineStore("order", () => {
   const orders = ref(loadFromStorage(ORDERS_STORAGE_KEY, DEFAULT_ORDERS));
 
@@ -101,7 +148,13 @@ export const useOrderStore = defineStore("order", () => {
 
   // 依狀態統計數量，後台儀表板 / 訂單管理頁可直接使用
   const countByStatus = computed(() => {
-    const counts = { pending: 0, processing: 0, shipped: 0, completed: 0, cancelled: 0 };
+    const counts = {
+      pending: 0,
+      processing: 0,
+      shipped: 0,
+      completed: 0,
+      cancelled: 0,
+    };
     orders.value.forEach((order) => {
       if (counts[order.status] !== undefined) {
         counts[order.status] += 1;
@@ -110,7 +163,7 @@ export const useOrderStore = defineStore("order", () => {
     return counts;
   });
 
-  // 從購物車結帳建立新訂單（Checkout.vue 完成後串接這裡）
+  // 從購物車結帳建立新訂單
   const createOrder = ({ items, totalAmount }) => {
     const newOrder = {
       id: Math.max(0, ...orders.value.map((o) => o.id)) + 1,
