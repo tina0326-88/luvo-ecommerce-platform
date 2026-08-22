@@ -13,6 +13,8 @@ const DEFAULT_ORDERS = [
   {
     id: 1,
     orderNumber: "LV20260710-1042",
+    customerName: "王小明",
+    customerPhone: "0912-345-678",
     status: "pending",
     createdAt: "2026-07-10",
     trackingNumber: null,
@@ -32,6 +34,8 @@ const DEFAULT_ORDERS = [
   {
     id: 2,
     orderNumber: "LV20260705-3387",
+    customerName: "陳美玲",
+    customerPhone: "0928-111-222",
     status: "processing",
     createdAt: "2026-07-05",
     trackingNumber: null,
@@ -59,6 +63,8 @@ const DEFAULT_ORDERS = [
   {
     id: 3,
     orderNumber: "LV20260628-8821",
+    customerName: "林家豪",
+    customerPhone: "0955-333-444",
     status: "shipped",
     createdAt: "2026-06-28",
     trackingNumber: "TW1234567890",
@@ -78,6 +84,8 @@ const DEFAULT_ORDERS = [
   {
     id: 4,
     orderNumber: "LV20260610-1195",
+    customerName: "張雅婷",
+    customerPhone: "0966-555-666",
     status: "completed",
     createdAt: "2026-06-10",
     trackingNumber: "TW1234567800",
@@ -97,6 +105,8 @@ const DEFAULT_ORDERS = [
   {
     id: 5,
     orderNumber: "LV20260528-4470",
+    customerName: "黃志偉",
+    customerPhone: "0977-777-888",
     status: "completed",
     createdAt: "2026-05-28",
     trackingNumber: "TW1234567711",
@@ -116,6 +126,8 @@ const DEFAULT_ORDERS = [
   {
     id: 6,
     orderNumber: "LV20260510-7734",
+    customerName: "李佳蓉",
+    customerPhone: "0933-999-000",
     status: "cancelled",
     createdAt: "2026-05-10",
     trackingNumber: null,

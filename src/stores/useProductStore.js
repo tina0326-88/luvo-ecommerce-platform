@@ -808,6 +808,51 @@ export const useProductStore = defineStore("product", () => {
 
   const totalCount = computed(() => products.value.length);
 
+  // 商品資料原本沒有「上架/下架」欄位，統一用這個工具判斷狀態，
+  // 沒有明確設定 status 的商品一律視為「上架中」，避免要逐一回頭修改所有 mock 資料
+  const getStatus = (product) => product.status || "active";
+
+  // 新增商品：id 統一從目前最大 id + 1 開始，避免跟既有商品（含配件類 300~500 區間）衝突
+  const createProduct = (data) => {
+    const newProduct = {
+      id: Math.max(0, ...products.value.map((p) => p.id)) + 1,
+      status: "active",
+      rating: 0,
+      reviews: 0,
+      isNew: true,
+      discount: 0,
+      ...data,
+    };
+    products.value.push(newProduct);
+    return newProduct;
+  };
+
+  const updateProduct = (id, updates) => {
+    const target = products.value.find((p) => p.id === id);
+    if (!target) return;
+    Object.assign(target, updates);
+  };
+
+  const deleteProduct = (id) => {
+    products.value = products.value.filter((p) => p.id !== id);
+  };
+
+  const deleteProducts = (ids) => {
+    products.value = products.value.filter((p) => !ids.includes(p.id));
+  };
+
+  const setProductStatus = (id, status) => {
+    const target = products.value.find((p) => p.id === id);
+    if (!target) return;
+    target.status = status;
+  };
+
+  const setProductsStatus = (ids, status) => {
+    products.value.forEach((p) => {
+      if (ids.includes(p.id)) p.status = status;
+    });
+  };
+
   return {
     products,
     categoryLabels,
@@ -815,5 +860,12 @@ export const useProductStore = defineStore("product", () => {
     getProductById,
     getProductsByCategory,
     getRelatedProducts,
+    getStatus,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    deleteProducts,
+    setProductStatus,
+    setProductsStatus,
   };
 });
