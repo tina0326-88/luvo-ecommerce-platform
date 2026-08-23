@@ -3,7 +3,7 @@
     <!-- 頁面橫幅 -->
     <div class="relative h-96 overflow-hidden">
       <img
-        src="/images/luvo-leather-shoes-1.jpg"
+        src="/images/luvo-bags-1.jpg"
         alt="包款系列"
         class="absolute inset-0 w-full h-full object-cover"
       />
@@ -86,7 +86,7 @@
       </div>
 
       <!-- 商品列表 -->
-      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
         <ProductCard
           v-for="product in filteredProducts"
           :key="product.id"
