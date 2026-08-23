@@ -1,11 +1,7 @@
 <template>
-  <div
-    class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12"
-  >
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
     <div class="w-full max-w-md bg-white rounded-xl shadow-md p-8">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">
-        會員登入
-      </h1>
+      <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">會員登入</h1>
       <p class="text-sm text-gray-500 text-center mb-6">
         歡迎回來，登入以繼續購物
       </p>
@@ -30,25 +26,25 @@
 
         <p v-if="formError" class="text-sm text-red-600">{{ formError }}</p>
 
-        <BaseButton type="submit" variant="primary" block :loading="submitting">
+        <BaseButton
+          type="submit"
+          variant="primary"
+          block
+          :loading="submitting"
+        >
           登入
         </BaseButton>
       </form>
 
       <p class="text-center text-sm text-gray-500 mt-6">
         還沒有帳號？
-        <router-link
-          to="/user/register"
-          class="text-amber-800 font-medium hover:underline"
-        >
+        <router-link to="/user/register" class="text-amber-800 font-medium hover:underline">
           立即註冊
         </router-link>
       </p>
 
       <!-- 測試帳號提示：純前端展示專案，方便評審快速登入體驗 -->
-      <div
-        class="mt-6 pt-6 border-t border-gray-100 text-xs text-gray-400 space-y-1"
-      >
+      <div class="mt-6 pt-6 border-t border-gray-100 text-xs text-gray-400 space-y-1">
         <p>測試帳號（僅供展示，非真實驗證）：</p>
         <p>管理員：demo@luvo.com / 123456</p>
         <p>一般會員：user@luvo.com / user123</p>
@@ -106,8 +102,13 @@ const handleSubmit = async () => {
     return;
   }
 
-  // 支援 guards.js 導來的 redirect query，登入成功後回到原本要去的頁面
-  const redirectTo = route.query.redirect || "/";
+  // 登入成功後依身分分流：
+  // - 有 redirect 參數（guards.js 導來的）優先導回原本要去的頁面
+  // - 沒有 redirect 時，管理員導去後台儀表板，一般會員導回首頁
+  const redirectTo =
+    route.query.redirect ||
+    (userStore.isAdmin ? "/admin/dashboard" : "/");
+
   router.push(redirectTo);
 };
 </script>

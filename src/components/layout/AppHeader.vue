@@ -49,6 +49,15 @@
             </span>
           </router-link>
 
+          <!-- 管理員專屬：回後台入口，只有管理員登入時才會顯示 -->
+          <router-link
+            v-if="userStore.isAdmin"
+            to="/admin/dashboard"
+            class="hidden sm:block text-sm font-medium text-amber-800 hover:text-amber-900 transition-colors"
+          >
+            管理後台
+          </router-link>
+
           <!-- 會員 -->
           <router-link
             v-if="userStore.isLoggedIn"
@@ -88,6 +97,16 @@
           @click="mobileMenuOpen = false"
         >
           {{ link.label }}
+        </router-link>
+
+        <!-- 管理員專屬：手機版選單也要有回後台的入口 -->
+        <router-link
+          v-if="userStore.isAdmin"
+          to="/admin/dashboard"
+          class="text-sm font-medium text-amber-800 hover:text-amber-900 transition-colors"
+          @click="mobileMenuOpen = false"
+        >
+          管理後台
         </router-link>
       </nav>
     </div>

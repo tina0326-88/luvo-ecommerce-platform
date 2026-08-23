@@ -101,21 +101,22 @@
               </span>
             </div>
 
+            <!-- 操作改用 button + click 事件處理，完全不使用 <a> 標籤 -->
             <div class="flex gap-2 mt-4">
-              
-                :href="store.mapUrl"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="flex-1 text-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              <button
+                type="button"
+                class="flex-1 px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                @click="openMap(store)"
               >
                 地圖導航
-              </a>
-              
-                :href="`tel:${store.phone}`"
-                class="flex-1 text-center px-4 py-2 bg-amber-800 text-white rounded-lg text-sm font-medium hover:bg-amber-900 transition-colors"
+              </button>
+              <button
+                type="button"
+                class="flex-1 px-4 py-2 rounded-lg text-sm font-medium bg-amber-800 text-white hover:bg-amber-900 transition-colors"
+                @click="callStore(store)"
               >
                 撥打電話
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -132,7 +133,6 @@
 <script setup>
 import { ref, computed } from "vue";
 
-// 展示用門市資料，地址／電話為示範內容，非實際門市資訊
 const stores = ref([
   {
     id: 1,
@@ -246,31 +246,26 @@ const stores = ref([
   },
 ]);
 
-// 導航連結一律以「店名 + 地址」組成 Google 地圖搜尋連結，
-// 不寫死經緯度，避免資料不準確導致導航錯誤地點
-const storesWithMapUrl = computed(() =>
-  stores.value.map((store) => ({
-    ...store,
-    mapUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-      `${store.name} ${store.address}`
-    )}`,
-  }))
-);
-
-const regions = computed(() => [...new Set(stores.value.map((s) => s.region))]);
+const regions = computed(() => {
+  const set = new Set();
+  for (const s of stores.value) set.add(s.region);
+  return Array.from(set);
+});
 
 const filterRegion = ref("");
 const filterCity = ref("");
 
 const cityOptions = computed(() => {
+  const set = new Set();
   const source = filterRegion.value
     ? stores.value.filter((s) => s.region === filterRegion.value)
     : stores.value;
-  return [...new Set(source.map((s) => s.city))];
+  for (const s of source) set.add(s.city);
+  return Array.from(set);
 });
 
 const filteredStores = computed(() => {
-  let result = storesWithMapUrl.value;
+  let result = stores.value;
 
   if (filterRegion.value) {
     result = result.filter((s) => s.region === filterRegion.value);
@@ -281,4 +276,16 @@ const filteredStores = computed(() => {
 
   return result;
 });
+
+// 用 window.open 開新分頁導向 Google 地圖搜尋，取代 <a target="_blank">
+function openMap(store) {
+  const query = encodeURIComponent(store.name + " " + store.address);
+  const url = "https://www.google.com/maps/search/?api=1&query=" + query;
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
+// 用 window.location.href 觸發撥號，取代 <a href="tel:...">
+function callStore(store) {
+  window.location.href = "tel:" + store.phone;
+}
 </script>
