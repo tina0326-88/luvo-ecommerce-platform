@@ -3,7 +3,7 @@
     <!-- 頁面橫幅 -->
     <div class="relative h-96 overflow-hidden">
       <img
-        src="/images/luvo-leather-shoes-1.jpg"
+        src="/images/luvo-boots-1.jpg"
         alt="靴子系列"
         class="absolute inset-0 w-full h-full object-cover"
       />
